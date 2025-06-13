@@ -1,0 +1,276 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27cda646c69e6e94caf7e5cc59f08944, type: 3}
+  m_Name: NPC_SPEAR_MAN_DIALOG
+  m_EditorClassIdentifier: 
+  enabled: 0
+  values:
+  - {fileID: 114798590608333524}
+  options:
+  - conditions:
+    - {fileID: 114229925642528862}
+    actions:
+    - {fileID: 114932725404316552}
+    - {fileID: 114361998074325808}
+    - {fileID: 114704320971160038}
+  - conditions:
+    - {fileID: 114590234113774028}
+    actions:
+    - {fileID: 114866189940843926}
+    - {fileID: 114288652899043620}
+    - {fileID: 114460840931848868}
+  - conditions:
+    - {fileID: 114255300976849396}
+    actions:
+    - {fileID: 114037738946139152}
+    - {fileID: 114191498960489076}
+--- !u!114 &114037738946139152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dc1dfb3363a199408e95b54b06135b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 3
+  text: We meet again... Young undead.
+  audioClip: {fileID: 8300000, guid: 86f6a962671acaa41a3bf5f2839baf16, type: 3}
+--- !u!114 &114191498960489076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e27811b84851b4c99bb59fbe2e321d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0
+  varName: index
+  bConstant: 0
+  iConstant: 1
+  fConstant: 0
+  sConstant: 
+--- !u!114 &114229925642528862
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d0402d785b88d849a82a99b906bd61b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  value: {fileID: 114798590608333524}
+  operation: 0
+  bConstant: 0
+  iConstant: 0
+  fConstant: 0
+  sConstant: 
+  nextOperand: 0
+--- !u!114 &114255300976849396
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d0402d785b88d849a82a99b906bd61b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  value: {fileID: 114798590608333524}
+  operation: 2
+  bConstant: 0
+  iConstant: 1
+  fConstant: 0
+  sConstant: 
+  nextOperand: 0
+--- !u!114 &114288652899043620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dc1dfb3363a199408e95b54b06135b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 3
+  text: Oh my... Don't mind me... I'm just talking amongst myself...
+  audioClip: {fileID: 8300000, guid: 770c6adfa25d7794da3643f9de7bfbfb, type: 3}
+--- !u!114 &114342400958045172
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d0402d785b88d849a82a99b906bd61b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  value: {fileID: 114798590608333524}
+  operation: 0
+  bConstant: 0
+  iConstant: 0
+  fConstant: 0
+  sConstant: 
+  nextOperand: 0
+--- !u!114 &114361998074325808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dc1dfb3363a199408e95b54b06135b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 3
+  text: A-a-a. Look how far this undead, has wondered
+  audioClip: {fileID: 8300000, guid: b03140a6cb43f9d4f893780828c7a251, type: 3}
+--- !u!114 &114460840931848868
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e27811b84851b4c99bb59fbe2e321d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0
+  varName: index
+  bConstant: 0
+  iConstant: 2
+  fConstant: 0
+  sConstant: 
+--- !u!114 &114491480083204358
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d0402d785b88d849a82a99b906bd61b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  value: {fileID: 114798590608333524}
+  operation: 0
+  bConstant: 0
+  iConstant: 0
+  fConstant: 0
+  sConstant: 
+  nextOperand: 0
+--- !u!114 &114590234113774028
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d0402d785b88d849a82a99b906bd61b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  value: {fileID: 114798590608333524}
+  operation: 0
+  bConstant: 0
+  iConstant: 1
+  fConstant: 0
+  sConstant: 
+  nextOperand: 0
+--- !u!114 &114704320971160038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e27811b84851b4c99bb59fbe2e321d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0
+  varName: index
+  bConstant: 0
+  iConstant: 1
+  fConstant: 0
+  sConstant: 
+--- !u!114 &114798590608333524
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40c38da47c4dc494b8856fe34772b9c4, type: 3}
+  m_Name: index
+  m_EditorClassIdentifier: 
+  bValue: 0
+  iValue: 0
+  fValue: 0
+  sValue: 
+  type: 1
+--- !u!114 &114866189940843926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dc1dfb3363a199408e95b54b06135b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 3
+  text: ...
+  audioClip: {fileID: 0}
+--- !u!114 &114932725404316552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dc1dfb3363a199408e95b54b06135b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 2
+  text: ...
+  audioClip: {fileID: 0}

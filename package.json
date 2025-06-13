@@ -1,0 +1,14 @@
+{
+    "name": "com.deathbygravitystudio.behaviour.dialog",
+    "version": "0.1.0",
+    "displayName": "Behaviour Dialog",
+    "description": "Dialog system for behaviours",
+    "dependencies": {
+        "com.deathbygravitystudio.behaviour.vars": "0.1.0",
+        "com.deathbygravitystudio.behaviour.hfsm": "0.1.0",
+        "com.unity.timeline": "1.8.7"
+    },
+    "author": {
+        "name": "Death By Gravity Studio"
+    }
+}

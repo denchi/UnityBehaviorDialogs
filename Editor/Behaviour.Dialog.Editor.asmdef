@@ -1,0 +1,18 @@
+{
+    "name": "Behaviour.Dialog.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Behaviour.Dialog",
+        "Behaviour.Vars",
+        "Behaviour.Vars.Editor"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

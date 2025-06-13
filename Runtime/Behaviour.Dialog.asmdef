@@ -1,0 +1,8 @@
+{
+    "name": "Behaviour.Dialog",
+    "references": [
+        "Behaviour.Vars",
+        "Behaviour.HFSM",
+        "Unity.Timeline"
+    ]
+}
