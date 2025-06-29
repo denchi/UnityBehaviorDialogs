@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Linq;
-using Sirenix.OdinInspector;
+using UnityEngine;
 
 namespace Behaviours
 {
@@ -9,29 +9,19 @@ namespace Behaviours
     {
         public class DialogActionSet : DialogActionBase
         {
-            [ValueDropdown(nameof(Values))]
-            [HorizontalGroup("Value")]
-            [LabelText("Set")]
+            [SerializeField]
             public string varName;
             
-            [HorizontalGroup("Value")]
-            [ShowIf(nameof(IsValueBool))]
-            [HideLabel]
+            [SerializeField]
             public bool bConstant;
         
-            [HorizontalGroup("Value")]
-            [ShowIf(nameof(IsValueInt))]
-            [HideLabel]
+            [SerializeField]
             public int iConstant;
         
-            [HorizontalGroup("Value")]
-            [ShowIf(nameof(IsValueFloat))]
-            [HideLabel]
+            [SerializeField]
             public float fConstant;
         
-            [HorizontalGroup("Value")]
-            [ShowIf(nameof(IsValueString))]
-            [HideLabel]
+            [SerializeField]
             public string sConstant;
 
             public override IEnumerator Execute(IDialogContext context)
@@ -60,42 +50,37 @@ namespace Behaviours
                 }
             }
             
-            private IEnumerable Values
+            private string[] GetAvailableValues()
             {
-                get
+                #if UNITY_EDITOR
+                var thisPath = UnityEditor.AssetDatabase.GetAssetPath(this);
+                var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(thisPath);
+                if (mainAsset is ILayer layer)
                 {
-                    #if UNITY_EDITOR
-                    var thisPath = UnityEditor.AssetDatabase.GetAssetPath(this);
-                    var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(thisPath);
-                    if (mainAsset is ILayer layer)
-                    {
-                        return layer.values.Select(v => v.name);
-                    }
-                    #endif
-
-                    return Array.Empty<string>();
+                    return layer.values.Select(v => v.name).ToArray();
                 }
+                #endif
+
+                return Array.Empty<string>();
             }
 
-            private Value ValueFromParent
+            public Value GetValueFromParent()
             {
-                get
+                #if UNITY_EDITOR
+                var thisPath = UnityEditor.AssetDatabase.GetAssetPath(this);
+                var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(thisPath);
+                if (mainAsset is ILayer layer)
                 {
-                    #if UNITY_EDITOR
-                    var thisPath = UnityEditor.AssetDatabase.GetAssetPath(this);
-                    var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(thisPath);
-                    if (mainAsset is ILayer layer)
-                    {
-                        return layer.values.Find(v => v.name == varName);
-                    }
-                    #endif
-                    return null;
+                    return layer.values.Find(v => v.name == varName);
                 }
+                #endif
+                return null;
             }
-            private bool IsValueBool => ValueFromParent is { type: ValueType.Bool };
-            private bool IsValueInt => ValueFromParent is { type: ValueType.Integer };
-            private bool IsValueFloat => ValueFromParent is { type: ValueType.Float };
-            private bool IsValueString => ValueFromParent is { type: ValueType.String };
+            
+            public bool IsValueBool() => GetValueFromParent() is { type: ValueType.Bool };
+            public bool IsValueInt() => GetValueFromParent() is { type: ValueType.Integer };
+            public bool IsValueFloat() => GetValueFromParent() is { type: ValueType.Float };
+            public bool IsValueString() => GetValueFromParent() is { type: ValueType.String };
         }
     }
 }

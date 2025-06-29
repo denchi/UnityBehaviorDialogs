@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Timeline;
@@ -49,25 +48,9 @@ namespace Behaviours.Dialogs
         [Serializable]
         public class InputOptionAction
         {
-            [HorizontalGroup("Value")]
             public InputOptionActionType type;
-            
-            [ValueDropdown(nameof(Values))]
-            [HorizontalGroup("Value")]
-            [HideLabel]
-            [ShowIf(nameof(type), InputOptionActionType.ChangeValue)]
             public string varName;
-            
-            //TODO: Add a dropdown to select the action state from the current layer
-            //[ActionStateId]
-            [HorizontalGroup("Value")]
-            [HideLabel]
-            [ShowIf(nameof(type), InputOptionActionType.TriggerAction)]
             public string stateName;
-            
-            [HorizontalGroup("Value")]
-            [HideLabel]
-            [ShowIf(nameof(type), InputOptionActionType.Cutscene)]
             public TimelineAsset cutscene;
 
             private InputOption _option;
@@ -78,21 +61,18 @@ namespace Behaviours.Dialogs
                 set => _option = value;
             }
             
-            private IEnumerable Values
+            public IEnumerable GetValuesForDropdown()
             {
-                get
+                #if UNITY_EDITOR
+                var thisPath = UnityEditor.AssetDatabase.GetAssetPath(Option.DialogAction);
+                var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(thisPath);
+                if (mainAsset is ILayer layer)
                 {
-                    #if UNITY_EDITOR
-                    var thisPath = UnityEditor.AssetDatabase.GetAssetPath(Option.DialogAction);
-                    var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(thisPath);
-                    if (mainAsset is ILayer layer)
-                    {
-                        return layer.values.Select(v => v.name);
-                    }
-                    #endif
-
-                    return Array.Empty<string>();
+                    return layer.values.Select(v => v.name);
                 }
+                #endif
+
+                return Array.Empty<string>();
             }
         }
         
