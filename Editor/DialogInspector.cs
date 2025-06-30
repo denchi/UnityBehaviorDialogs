@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-//[CustomEditor(typeof(Dialog))]
+[CustomEditor(typeof(Dialog))]
 public class DialogInspector : Editor
 {
     public override void OnInspectorGUI()
