@@ -53,6 +53,8 @@ public class DialogInspector : Editor
             menu.AddItem(new GUIContent("Add Talk Action"), false, () => { Dialog.Editor.CreateAction<DialogActionTalk>(dialog, option); });
             menu.AddItem(new GUIContent("Add Talk Action (Multi)"), false, () => { Dialog.Editor.CreateAction<DialogActionTalkMultiple>(dialog, option); });
             menu.AddItem(new GUIContent("Add Set Action"), false, () => { Dialog.Editor.CreateAction<DialogActionSet>(dialog, option); });
+            // Add support for DialogAddInputAction
+            menu.AddItem(new GUIContent("Add Input Action"), false, () => { Dialog.Editor.CreateAction<DialogAddInputAction>(dialog, option); });
             menu.ShowAsContext();
         }
     }
@@ -125,6 +127,15 @@ public class DialogInspector : Editor
                             idxToDelete = i;
                         }
 
+                        break;
+                    }
+                    // Add support for DialogAddInputAction
+                    case DialogAddInputAction inputAction:
+                    {
+                        if (!DrawActionInput(i, inputAction, dialog))
+                        {
+                            idxToDelete = i;
+                        }
                         break;
                     }
                     default:
@@ -461,6 +472,157 @@ public class DialogInspector : Editor
                 }
             }
             EditorGUILayout.EndHorizontal();
+        }
+        EditorGUILayout.EndVertical();
+
+        return didNotDelete;
+    }
+
+    // Add inspector UI for DialogAddInputAction
+    bool DrawActionInput(int idx, DialogAddInputAction action, Dialog dialog)
+    {
+        bool didNotDelete = true;
+
+        EditorGUILayout.BeginVertical(GUI.skin.box);
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                //EditorGUILayout.PrefixLabel("Input", EditorStyles.boldLabel);
+
+                EditorGUI.BeginChangeCheck();
+                string newPrompt = EditorGUILayout.TextField("Prompt", action.prompt);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Undo.RecordObject(action, "Changed input prompt");
+                    action.prompt = newPrompt;
+                    EditorUtility.SetDirty(action);
+                }
+
+                if (GUILayout.Button("-", GUILayout.Width(20)))
+                {
+                    didNotDelete = false;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.LabelField("Options", EditorStyles.boldLabel);
+
+            if (action.options == null)
+                action.options = new List<DialogAddInputAction.InputOption>();
+
+            int optionToDelete = -1;
+            for (int i = 0; i < action.options.Count; i++)
+            {
+                var opt = action.options[i];
+                EditorGUILayout.BeginVertical(GUI.skin.box);
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        EditorGUI.BeginChangeCheck();
+                        string newText = EditorGUILayout.TextField("Text", opt.text);
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            Undo.RecordObject(action, "Changed input option text");
+                            opt.text = newText;
+                            EditorUtility.SetDirty(action);
+                        }
+                        if (GUILayout.Button("-", GUILayout.Width(20)))
+                        {
+                            optionToDelete = i;
+                        }
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.LabelField("Actions", EditorStyles.miniBoldLabel);
+
+                    if (opt.actions == null)
+                        opt.actions = new List<DialogAddInputAction.InputOptionAction>();
+
+                    int actionToDelete = -1;
+                    for (int j = 0; j < opt.actions.Count; j++)
+                    {
+                        var optAction = opt.actions[j];
+                        EditorGUILayout.BeginHorizontal();
+                        {
+                            EditorGUI.BeginChangeCheck();
+                            var newType = (DialogAddInputAction.InputOptionActionType)EditorGUILayout.EnumPopup(optAction.type, GUILayout.Width(100));
+                            if (EditorGUI.EndChangeCheck())
+                            {
+                                Undo.RecordObject(action, "Changed input option action type");
+                                optAction.type = newType;
+                                EditorUtility.SetDirty(action);
+                            }
+
+                            switch (optAction.type)
+                            {
+                                case DialogAddInputAction.InputOptionActionType.ChangeValue:
+                                    EditorGUI.BeginChangeCheck();
+                                    string newVar = EditorGUILayout.TextField(GUIContent.none, optAction.varName);
+                                    if (EditorGUI.EndChangeCheck())
+                                    {
+                                        Undo.RecordObject(action, "Changed input option action varName");
+                                        optAction.varName = newVar;
+                                        EditorUtility.SetDirty(action);
+                                    }
+                                    break;
+                                case DialogAddInputAction.InputOptionActionType.TriggerAction:
+                                    EditorGUI.BeginChangeCheck();
+                                    string newState = EditorGUILayout.TextField(GUIContent.none, optAction.stateName);
+                                    if (EditorGUI.EndChangeCheck())
+                                    {
+                                        Undo.RecordObject(action, "Changed input option action stateName");
+                                        optAction.stateName = newState;
+                                        EditorUtility.SetDirty(action);
+                                    }
+                                    break;
+                                case DialogAddInputAction.InputOptionActionType.Cutscene:
+                                    EditorGUI.BeginChangeCheck();
+                                    var newCutscene = (UnityEngine.Timeline.TimelineAsset)EditorGUILayout.ObjectField(optAction.cutscene, typeof(UnityEngine.Timeline.TimelineAsset), false);
+                                    if (EditorGUI.EndChangeCheck())
+                                    {
+                                        Undo.RecordObject(action, "Changed input option action cutscene");
+                                        optAction.cutscene = newCutscene;
+                                        EditorUtility.SetDirty(action);
+                                    }
+                                    break;
+                            }
+
+                            if (GUILayout.Button("-", GUILayout.Width(20)))
+                            {
+                                actionToDelete = j;
+                            }
+                        }
+                        EditorGUILayout.EndHorizontal();
+                    }
+                    if (actionToDelete != -1)
+                    {
+                        Undo.RecordObject(action, "Removed input option action");
+                        opt.actions.RemoveAt(actionToDelete);
+                        EditorUtility.SetDirty(action);
+                    }
+
+                    if (GUILayout.Button("Add Action"))
+                    {
+                        Undo.RecordObject(action, "Added input option action");
+                        opt.actions.Add(new DialogAddInputAction.InputOptionAction());
+                        EditorUtility.SetDirty(action);
+                    }
+                }
+                EditorGUILayout.EndVertical();
+            }
+            if (optionToDelete != -1)
+            {
+                Undo.RecordObject(action, "Removed input option");
+                action.options.RemoveAt(optionToDelete);
+                EditorUtility.SetDirty(action);
+            }
+
+            if (GUILayout.Button("Add Option"))
+            {
+                Undo.RecordObject(action, "Added input option");
+                action.options.Add(new DialogAddInputAction.InputOption());
+                EditorUtility.SetDirty(action);
+            }
         }
         EditorGUILayout.EndVertical();
 

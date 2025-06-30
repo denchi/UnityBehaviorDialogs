@@ -4,7 +4,8 @@
     "references": [
         "Behaviour.Dialog",
         "Behaviour.Vars",
-        "Behaviour.Vars.Editor"
+        "Behaviour.Vars.Editor",
+        "Unity.Timeline"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
