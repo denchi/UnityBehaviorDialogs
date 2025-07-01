@@ -23,10 +23,29 @@ public class DialogInspector : Editor
         var idxToDelete = -1;
         for (var i = 0; i < dialog.options.Count; i++)
         {
-            if (!DrawOption(i, dialog, values))
+            EditorGUILayout.Space(8);
+            EditorGUILayout.BeginVertical("box");
             {
-                idxToDelete = i;
+                EditorGUILayout.BeginHorizontal();
+                // Add icon next to option label
+                var icon = EditorGUIUtility.IconContent("d_UnityEditor.ConsoleWindow").image;
+                GUILayout.Label(icon, GUILayout.Width(20), GUILayout.Height(20));
+                EditorGUILayout.LabelField($"Option {i + 1}", EditorStyles.boldLabel);
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("Remove Option", GUILayout.Width(120)))
+                {
+                    idxToDelete = i;
+                }
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.Space(4);
+
+                if (DrawOption(i, dialog, values))
+                {
+                    // Option drawn successfully
+                }
             }
+            EditorGUILayout.EndVertical();
         }
 
         if (idxToDelete != -1)
@@ -34,6 +53,7 @@ public class DialogInspector : Editor
             Dialog.Editor.RemoveOption(idxToDelete, dialog);
         }
 
+        EditorGUILayout.Space(10);
         DrawAddOption(dialog);
     }
 
@@ -71,85 +91,97 @@ public class DialogInspector : Editor
     {
         var option = dialog.options[idx];
 
-        EditorGUILayout.BeginVertical(GUI.skin.box);
+        // Outline for Conditions block
+        EditorGUILayout.BeginVertical("HelpBox");
         {
-            EditorGUILayout.PrefixLabel("Conditions");
-            var idxToDelete = -1;
-            for (var i = 0; i < option.conditions.Count; i++)
+            EditorGUILayout.BeginVertical(GUI.skin.box);
             {
-                var condition = option.conditions[i];
-                if (!DrawCondition(i, condition, dialog, values))
+                EditorGUILayout.LabelField("Conditions", EditorStyles.boldLabel);
+                var idxToDelete = -1;
+                for (var i = 0; i < option.conditions.Count; i++)
                 {
-                    idxToDelete = i;
+                    var condition = option.conditions[i];
+                    if (!DrawCondition(i, condition, dialog, values))
+                    {
+                        idxToDelete = i;
+                    }
                 }
-            }
-            if (idxToDelete != -1)
-            {
-                Dialog.Editor.RemoveCondition(dialog, option, idxToDelete);
-            }
+                if (idxToDelete != -1)
+                {
+                    Dialog.Editor.RemoveCondition(dialog, option, idxToDelete);
+                }
 
-            DrawAddOptionCondition(dialog, option);
+                DrawAddOptionCondition(dialog, option);
+            }
+            EditorGUILayout.EndVertical();
         }
         EditorGUILayout.EndVertical();
 
-        EditorGUILayout.BeginVertical(GUI.skin.box);
+        EditorGUILayout.Space(4);
+
+        // Outline for Actions block
+        EditorGUILayout.BeginVertical("HelpBox");
         {
-            EditorGUILayout.PrefixLabel("Actions");
-
-            var idxToDelete = -1;
-            for (var i = 0; i < option.actions.Count; i++)
+            EditorGUILayout.BeginVertical(GUI.skin.box);
             {
-                var action = option.actions[i];
-                switch (action)
+                EditorGUILayout.LabelField("Actions", EditorStyles.boldLabel);
+
+                var idxToDelete = -1;
+                for (var i = 0; i < option.actions.Count; i++)
                 {
-                    case DialogActionTalk talk:
+                    var action = option.actions[i];
+                    switch (action)
                     {
-                        if (!DrawActionTalk(i, talk, dialog))
+                        case DialogActionTalk talk:
                         {
-                            idxToDelete = i;
-                        }
+                            if (!DrawActionTalk(i, talk, dialog))
+                            {
+                                idxToDelete = i;
+                            }
 
-                        break;
-                    }
-                    case DialogActionTalkMultiple talkMultiple:
-                    {
-                        if (!DrawActionTalkMultiple(i, talkMultiple, dialog))
-                        {
-                            idxToDelete = i;
+                            break;
                         }
+                        case DialogActionTalkMultiple talkMultiple:
+                        {
+                            if (!DrawActionTalkMultiple(i, talkMultiple, dialog))
+                            {
+                                idxToDelete = i;
+                            }
 
-                        break;
-                    }
-                    case DialogActionSet set:
-                    {
-                        if (!DrawActionSet(i, set, dialog, values))
-                        {
-                            idxToDelete = i;
+                            break;
                         }
+                        case DialogActionSet set:
+                        {
+                            if (!DrawActionSet(i, set, dialog, values))
+                            {
+                                idxToDelete = i;
+                            }
 
-                        break;
-                    }
-                    // Add support for DialogAddInputAction
-                    case DialogAddInputAction inputAction:
-                    {
-                        if (!DrawActionInput(i, inputAction, dialog))
-                        {
-                            idxToDelete = i;
+                            break;
                         }
-                        break;
+                        // Add support for DialogAddInputAction
+                        case DialogAddInputAction inputAction:
+                        {
+                            if (!DrawActionInput(i, inputAction, dialog))
+                            {
+                                idxToDelete = i;
+                            }
+                            break;
+                        }
+                        default:
+                            EditorGUILayout.PrefixLabel("Action " + i.ToString());
+                            break;
                     }
-                    default:
-                        EditorGUILayout.PrefixLabel("Action " + i.ToString());
-                        break;
                 }
-            }
 
-            if (idxToDelete != -1)
-            {
-                Dialog.Editor.RemoveAction(dialog, option, idxToDelete);
-            }
+                if (idxToDelete != -1)
+                {
+                    Dialog.Editor.RemoveAction(dialog, option, idxToDelete);
+                }
 
-            DrawAddOptionAction(dialog, option);
+                DrawAddOptionAction(dialog, option);
+            }
+            EditorGUILayout.EndVertical();
         }
         EditorGUILayout.EndVertical();
 
