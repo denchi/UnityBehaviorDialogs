@@ -55,6 +55,9 @@ public class DialogInspector : Editor
 
         EditorGUILayout.Space(10);
         DrawAddOption(dialog);
+        
+        EditorGUILayout.Space(15);
+        DrawJsonExportImport(dialog);
     }
 
     void DrawAddOption(Dialog dialog)
@@ -659,5 +662,181 @@ public class DialogInspector : Editor
         EditorGUILayout.EndVertical();
 
         return didNotDelete;
+    }
+
+    void DrawJsonExportImport(Dialog dialog)
+    {
+        EditorGUILayout.BeginVertical(GUI.skin.box);
+        {
+            EditorGUILayout.LabelField("JSON Export/Import", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox("Export dialog to JSON file or import from JSON to replace current content.", MessageType.Info);
+            
+            EditorGUILayout.BeginHorizontal();
+            {
+                if (GUILayout.Button("Export to JSON"))
+                {
+                    ExportDialogToJson(dialog);
+                }
+                
+                if (GUILayout.Button("Import from JSON (Replace)"))
+                {
+                    ImportAndReplaceDialog(dialog);
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+        }
+        EditorGUILayout.EndVertical();
+    }
+
+    void ExportDialogToJson(Dialog dialog)
+    {
+        var path = EditorUtility.SaveFilePanel(
+            "Export Dialog to JSON",
+            UnityEngine.Application.dataPath,
+            dialog.name + ".json",
+            "json"
+        );
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            Behaviours.Dialogs.DialogJsonExporter.SaveToFile(dialog, path);
+            EditorUtility.DisplayDialog("Export Complete", 
+                $"Dialog '{dialog.name}' has been exported to:\n{path}", "OK");
+        }
+    }
+
+    void ImportAndReplaceDialog(Dialog dialog)
+    {
+        var confirmed = EditorUtility.DisplayDialog(
+            "Import from JSON",
+            "This will replace ALL current dialog content with data from the JSON file. This action cannot be undone.\n\nAre you sure you want to continue?",
+            "Import & Replace", "Cancel"
+        );
+
+        if (!confirmed) return;
+
+        var path = EditorUtility.OpenFilePanel(
+            "Import Dialog from JSON",
+            UnityEngine.Application.dataPath,
+            "json"
+        );
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            var importedDialog = Behaviours.Dialogs.DialogJsonExporter.LoadFromFile(path);
+            if (importedDialog != null)
+            {
+                // Record undo for the replacement
+                Undo.RecordObject(dialog, "Import Dialog from JSON");
+                
+                // Clear existing content
+                ClearDialogContent(dialog);
+                
+                // Copy imported data
+                dialog.name = importedDialog.name;
+                dialog.enabled = importedDialog.enabled;
+                
+                // Copy values
+                if (importedDialog.values != null)
+                {
+                    dialog.values = new List<Value>();
+                    foreach (var value in importedDialog.values)
+                    {
+                        var newValue = Object.Instantiate(value);
+                        AssetDatabase.AddObjectToAsset(newValue, dialog);
+                        dialog.values.Add(newValue);
+                    }
+                }
+                
+                // Copy options
+                if (importedDialog.options != null)
+                {
+                    dialog.options = new List<DialogOption>();
+                    foreach (var option in importedDialog.options)
+                    {
+                        var newOption = new DialogOption { dialog = dialog };
+                        
+                        // Copy conditions
+                        newOption.conditions = new List<Condition>();
+                        foreach (var condition in option.conditions)
+                        {
+                            var newCondition = Object.Instantiate(condition);
+                            // Re-link the value reference
+                            if (condition.value != null)
+                            {
+                                var valueName = condition.value.name;
+                                newCondition.value = dialog.values.Find(v => v.name == valueName);
+                            }
+                            AssetDatabase.AddObjectToAsset(newCondition, dialog);
+                            newOption.conditions.Add(newCondition);
+                        }
+                        
+                        // Copy actions
+                        newOption.actions = new List<DialogActionBase>();
+                        foreach (var action in option.actions)
+                        {
+                            var newAction = Object.Instantiate(action);
+                            AssetDatabase.AddObjectToAsset(newAction, dialog);
+                            newOption.actions.Add(newAction);
+                        }
+                        
+                        dialog.options.Add(newOption);
+                    }
+                }
+
+                EditorUtility.SetDirty(dialog);
+                AssetDatabase.SaveAssets();
+                
+                // Clean up temporary imported dialog
+                Object.DestroyImmediate(importedDialog);
+                
+                EditorUtility.DisplayDialog("Import Complete", 
+                    "Dialog content has been successfully imported and replaced.", "OK");
+            }
+            else
+            {
+                EditorUtility.DisplayDialog("Import Failed", 
+                    "Failed to import dialog from JSON file. Please check the console for errors.", "OK");
+            }
+        }
+    }
+
+    void ClearDialogContent(Dialog dialog)
+    {
+        // Clear and destroy existing sub-assets
+        if (dialog.values != null)
+        {
+            foreach (var value in dialog.values)
+            {
+                if (value != null)
+                    Object.DestroyImmediate(value, true);
+            }
+            dialog.values.Clear();
+        }
+
+        if (dialog.options != null)
+        {
+            foreach (var option in dialog.options)
+            {
+                if (option?.conditions != null)
+                {
+                    foreach (var condition in option.conditions)
+                    {
+                        if (condition != null)
+                            Object.DestroyImmediate(condition, true);
+                    }
+                }
+
+                if (option?.actions != null)
+                {
+                    foreach (var action in option.actions)
+                    {
+                        if (action != null)
+                            Object.DestroyImmediate(action, true);
+                    }
+                }
+            }
+            dialog.options.Clear();
+        }
     }
 }
