@@ -75,7 +75,7 @@ namespace Behaviours.Dialogs.Editor
         }
 
         [MenuItem("Assets/Dialog JSON/Validate JSON", validate = true)]
-        public static bool ValidateJsonFile()
+        public static bool ValidateJsonFile_MenuItem()
         {
             var path = AssetDatabase.GetAssetPath(Selection.activeObject);
             return !string.IsNullOrEmpty(path) && Path.GetExtension(path).ToLower() == ".json";
