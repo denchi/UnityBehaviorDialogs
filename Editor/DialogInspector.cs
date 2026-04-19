@@ -1,6 +1,8 @@
 ﻿using Behaviours;
 using Behaviours.Dialogs;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -73,13 +75,50 @@ public class DialogInspector : Editor
         if (GUILayout.Button("Add action"))
         {
             var menu = new GenericMenu();
-            menu.AddItem(new GUIContent("Add Talk Action"), false, () => { Dialog.Editor.CreateAction<DialogActionTalk>(dialog, option); });
-            menu.AddItem(new GUIContent("Add Talk Action (Multi)"), false, () => { Dialog.Editor.CreateAction<DialogActionTalkMultiple>(dialog, option); });
-            menu.AddItem(new GUIContent("Add Set Action"), false, () => { Dialog.Editor.CreateAction<DialogActionSet>(dialog, option); });
-            // Add support for DialogAddInputAction
-            menu.AddItem(new GUIContent("Add Input Action"), false, () => { Dialog.Editor.CreateAction<DialogAddInputAction>(dialog, option); });
+            var actionTypes = GetAvailableActionTypes();
+
+            if (actionTypes.Count == 0)
+            {
+                menu.AddDisabledItem(new GUIContent("No actions found"));
+            }
+            else
+            {
+                foreach (var actionType in actionTypes)
+                {
+                    var actionTypeCopy = actionType;
+                    var menuLabel = $"Add {GetActionDisplayName(actionTypeCopy)}";
+                    menu.AddItem(new GUIContent(menuLabel), false, () => { Dialog.Editor.CreateAction(actionTypeCopy, dialog, option); });
+                }
+            }
+
             menu.ShowAsContext();
         }
+    }
+
+    List<Type> GetAvailableActionTypes()
+    {
+        // TypeCache includes project scripts in Assets and package assemblies.
+        return TypeCache.GetTypesDerivedFrom<DialogActionBase>()
+            .Where(type => type != null && !type.IsAbstract && !type.IsGenericTypeDefinition)
+            .OrderBy(GetActionDisplayName)
+            .ToList();
+    }
+
+    string GetActionDisplayName(Type actionType)
+    {
+        if (actionType == typeof(DialogActionTalk)) return "Talk Action";
+        if (actionType == typeof(DialogActionTalkMultiple)) return "Talk Action (Multi)";
+        if (actionType == typeof(DialogActionSet)) return "Set Action";
+        if (actionType == typeof(DialogAddInputAction)) return "Input Action";
+
+        var name = actionType.Name;
+        const string prefix = "DialogAction";
+        if (name.StartsWith(prefix))
+        {
+            name = name.Substring(prefix.Length);
+        }
+
+        return string.IsNullOrEmpty(name) ? actionType.Name : ObjectNames.NicifyVariableName(name);
     }
 
     void DrawAddOptionCondition(Dialog dialog, DialogOption option)
@@ -172,7 +211,10 @@ public class DialogInspector : Editor
                             break;
                         }
                         default:
-                            EditorGUILayout.PrefixLabel("Action " + i.ToString());
+                            if (!DrawActionGeneric(i, action))
+                            {
+                                idxToDelete = i;
+                            }
                             break;
                     }
                 }
@@ -262,6 +304,49 @@ public class DialogInspector : Editor
         }
 
         EditorGUILayout.EndHorizontal();
+
+        return didNotDelete;
+    }
+
+    bool DrawActionGeneric(int idx, DialogActionBase action)
+    {
+        bool didNotDelete = true;
+
+        EditorGUILayout.BeginVertical(GUI.skin.box);
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.PrefixLabel(GetActionDisplayName(action.GetType()), EditorStyles.boldLabel);
+                GUILayout.FlexibleSpace();
+                if (GUILayout.Button("-", GUILayout.Width(20)))
+                {
+                    didNotDelete = false;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            var serializedAction = new SerializedObject(action);
+            serializedAction.Update();
+
+            var iterator = serializedAction.GetIterator();
+            bool enterChildren = true;
+            while (iterator.NextVisible(enterChildren))
+            {
+                enterChildren = false;
+                if (iterator.propertyPath == "m_Script")
+                {
+                    continue;
+                }
+
+                EditorGUILayout.PropertyField(iterator, true);
+            }
+
+            if (serializedAction.ApplyModifiedProperties())
+            {
+                EditorUtility.SetDirty(action);
+            }
+        }
+        EditorGUILayout.EndVertical();
 
         return didNotDelete;
     }

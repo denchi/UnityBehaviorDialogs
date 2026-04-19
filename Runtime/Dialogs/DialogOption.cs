@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using UnityEngine;
 
@@ -20,14 +21,27 @@ namespace Behaviours
             public Dialog dialog;
             
             /// <summary>
-            /// Helper method to find all non-abstract types derived from T in this assembly.
+            /// Helper method to find all non-abstract types derived from T in loaded assemblies.
             /// </summary>
             public static IEnumerable<Type> GetAllDerivedTypes<T>()
             {
-                return typeof(T)
-                    .Assembly
-                    .GetTypes()
-                    .Where(x => typeof(T) != x && typeof(T).IsAssignableFrom(x) && !x.IsAbstract);
+                var parentType = typeof(T);
+                return AppDomain.CurrentDomain
+                    .GetAssemblies()
+                    .SelectMany(GetTypesSafe)
+                    .Where(type => type != null && type != parentType && parentType.IsAssignableFrom(type) && !type.IsAbstract);
+            }
+
+            static IEnumerable<Type> GetTypesSafe(Assembly assembly)
+            {
+                try
+                {
+                    return assembly.GetTypes();
+                }
+                catch (ReflectionTypeLoadException exception)
+                {
+                    return exception.Types.Where(type => type != null);
+                }
             }
         }
     }
