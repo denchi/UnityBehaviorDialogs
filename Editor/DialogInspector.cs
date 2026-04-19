@@ -11,6 +11,9 @@ using ValueType = Behaviours.ValueType;
 [CustomEditor(typeof(Dialog))]
 public class DialogInspector : Editor
 {
+    readonly Dictionary<int, bool> _dialogOptionFoldouts = new Dictionary<int, bool>();
+    readonly Dictionary<string, bool> _inputOptionFoldouts = new Dictionary<string, bool>();
+
     public override void OnInspectorGUI()
     {
         //base.OnInspectorGUI();
@@ -27,26 +30,30 @@ public class DialogInspector : Editor
         var idxToDelete = -1;
         for (var i = 0; i < dialog.options.Count; i++)
         {
+            var option = dialog.options[i];
             EditorGUILayout.Space(8);
             EditorGUILayout.BeginVertical("box");
             {
                 EditorGUILayout.BeginHorizontal();
-                // Add icon next to option label
-                var icon = EditorGUIUtility.IconContent("d_UnityEditor.ConsoleWindow").image;
-                GUILayout.Label(icon, GUILayout.Width(20), GUILayout.Height(20));
-                EditorGUILayout.LabelField($"Option {i + 1}", EditorStyles.boldLabel);
+                var isExpanded = GetDialogOptionFoldout(i);
+                isExpanded = EditorGUILayout.Foldout(isExpanded, $"Option {i + 1}", true);
+                _dialogOptionFoldouts[i] = isExpanded;
                 GUILayout.FlexibleSpace();
+                EditorGUILayout.LabelField($"{option.conditions.Count} conditions / {option.actions.Count} actions", EditorStyles.miniLabel, GUILayout.MaxWidth(180));
                 if (GUILayout.Button("Remove Option", GUILayout.Width(120)))
                 {
                     idxToDelete = i;
                 }
                 EditorGUILayout.EndHorizontal();
 
-                EditorGUILayout.Space(4);
-
-                if (DrawOption(i, dialog, values))
+                if (isExpanded)
                 {
-                    // Option drawn successfully
+                    EditorGUILayout.Space(4);
+
+                    if (DrawOption(i, dialog, values))
+                    {
+                        // Option drawn successfully
+                    }
                 }
             }
             EditorGUILayout.EndVertical();
@@ -55,6 +62,7 @@ public class DialogInspector : Editor
         if (idxToDelete != -1)
         {
             Dialog.Editor.RemoveOption(idxToDelete, dialog);
+            RemoveDialogOptionFoldoutState(idxToDelete);
         }
 
         EditorGUILayout.Space(10);
@@ -636,9 +644,27 @@ public class DialogInspector : Editor
             for (int i = 0; i < action.options.Count; i++)
             {
                 var opt = action.options[i];
+                var foldoutKey = GetInputOptionFoldoutKey(action, i);
+                var isExpanded = GetInputOptionFoldout(foldoutKey);
                 EditorGUILayout.BeginVertical(GUI.skin.box);
                 {
                     EditorGUILayout.BeginHorizontal();
+                    {
+                        isExpanded = EditorGUILayout.Foldout(isExpanded, $"Option {i + 1}", true);
+                        _inputOptionFoldouts[foldoutKey] = isExpanded;
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button("-", GUILayout.Width(20)))
+                        {
+                            optionToDelete = i;
+                        }
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    if (!isExpanded)
+                    {
+                        EditorGUILayout.LabelField(string.IsNullOrEmpty(opt.text) ? "(empty)" : opt.text, EditorStyles.miniLabel);
+                    }
+                    else
                     {
                         EditorGUI.BeginChangeCheck();
                         string newText = EditorGUILayout.TextField("Text", opt.text);
@@ -648,86 +674,81 @@ public class DialogInspector : Editor
                             opt.text = newText;
                             EditorUtility.SetDirty(action);
                         }
-                        if (GUILayout.Button("-", GUILayout.Width(20)))
+
+                        EditorGUILayout.LabelField("Actions", EditorStyles.miniBoldLabel);
+
+                        if (opt.actions == null)
+                            opt.actions = new List<DialogAddInputAction.InputOptionAction>();
+
+                        int actionToDelete = -1;
+                        for (int j = 0; j < opt.actions.Count; j++)
                         {
-                            optionToDelete = i;
+                            var optAction = opt.actions[j];
+                            EditorGUILayout.BeginHorizontal();
+                            {
+                                EditorGUI.BeginChangeCheck();
+                                var newType = (DialogAddInputAction.InputOptionActionType)EditorGUILayout.EnumPopup(optAction.type, GUILayout.Width(100));
+                                if (EditorGUI.EndChangeCheck())
+                                {
+                                    Undo.RecordObject(action, "Changed input option action type");
+                                    optAction.type = newType;
+                                    EditorUtility.SetDirty(action);
+                                }
+
+                                switch (optAction.type)
+                                {
+                                    case DialogAddInputAction.InputOptionActionType.ChangeValue:
+                                        EditorGUI.BeginChangeCheck();
+                                        string newVar = EditorGUILayout.TextField(GUIContent.none, optAction.varName);
+                                        if (EditorGUI.EndChangeCheck())
+                                        {
+                                            Undo.RecordObject(action, "Changed input option action varName");
+                                            optAction.varName = newVar;
+                                            EditorUtility.SetDirty(action);
+                                        }
+                                        break;
+                                    case DialogAddInputAction.InputOptionActionType.TriggerAction:
+                                        EditorGUI.BeginChangeCheck();
+                                        string newState = EditorGUILayout.TextField(GUIContent.none, optAction.stateName);
+                                        if (EditorGUI.EndChangeCheck())
+                                        {
+                                            Undo.RecordObject(action, "Changed input option action stateName");
+                                            optAction.stateName = newState;
+                                            EditorUtility.SetDirty(action);
+                                        }
+                                        break;
+                                    case DialogAddInputAction.InputOptionActionType.Cutscene:
+                                        EditorGUI.BeginChangeCheck();
+                                        var newCutscene = (UnityEngine.Timeline.TimelineAsset)EditorGUILayout.ObjectField(optAction.cutscene, typeof(UnityEngine.Timeline.TimelineAsset), false);
+                                        if (EditorGUI.EndChangeCheck())
+                                        {
+                                            Undo.RecordObject(action, "Changed input option action cutscene");
+                                            optAction.cutscene = newCutscene;
+                                            EditorUtility.SetDirty(action);
+                                        }
+                                        break;
+                                }
+
+                                if (GUILayout.Button("-", GUILayout.Width(20)))
+                                {
+                                    actionToDelete = j;
+                                }
+                            }
+                            EditorGUILayout.EndHorizontal();
                         }
-                    }
-                    EditorGUILayout.EndHorizontal();
-
-                    EditorGUILayout.LabelField("Actions", EditorStyles.miniBoldLabel);
-
-                    if (opt.actions == null)
-                        opt.actions = new List<DialogAddInputAction.InputOptionAction>();
-
-                    int actionToDelete = -1;
-                    for (int j = 0; j < opt.actions.Count; j++)
-                    {
-                        var optAction = opt.actions[j];
-                        EditorGUILayout.BeginHorizontal();
+                        if (actionToDelete != -1)
                         {
-                            EditorGUI.BeginChangeCheck();
-                            var newType = (DialogAddInputAction.InputOptionActionType)EditorGUILayout.EnumPopup(optAction.type, GUILayout.Width(100));
-                            if (EditorGUI.EndChangeCheck())
-                            {
-                                Undo.RecordObject(action, "Changed input option action type");
-                                optAction.type = newType;
-                                EditorUtility.SetDirty(action);
-                            }
-
-                            switch (optAction.type)
-                            {
-                                case DialogAddInputAction.InputOptionActionType.ChangeValue:
-                                    EditorGUI.BeginChangeCheck();
-                                    string newVar = EditorGUILayout.TextField(GUIContent.none, optAction.varName);
-                                    if (EditorGUI.EndChangeCheck())
-                                    {
-                                        Undo.RecordObject(action, "Changed input option action varName");
-                                        optAction.varName = newVar;
-                                        EditorUtility.SetDirty(action);
-                                    }
-                                    break;
-                                case DialogAddInputAction.InputOptionActionType.TriggerAction:
-                                    EditorGUI.BeginChangeCheck();
-                                    string newState = EditorGUILayout.TextField(GUIContent.none, optAction.stateName);
-                                    if (EditorGUI.EndChangeCheck())
-                                    {
-                                        Undo.RecordObject(action, "Changed input option action stateName");
-                                        optAction.stateName = newState;
-                                        EditorUtility.SetDirty(action);
-                                    }
-                                    break;
-                                case DialogAddInputAction.InputOptionActionType.Cutscene:
-                                    EditorGUI.BeginChangeCheck();
-                                    var newCutscene = (UnityEngine.Timeline.TimelineAsset)EditorGUILayout.ObjectField(optAction.cutscene, typeof(UnityEngine.Timeline.TimelineAsset), false);
-                                    if (EditorGUI.EndChangeCheck())
-                                    {
-                                        Undo.RecordObject(action, "Changed input option action cutscene");
-                                        optAction.cutscene = newCutscene;
-                                        EditorUtility.SetDirty(action);
-                                    }
-                                    break;
-                            }
-
-                            if (GUILayout.Button("-", GUILayout.Width(20)))
-                            {
-                                actionToDelete = j;
-                            }
+                            Undo.RecordObject(action, "Removed input option action");
+                            opt.actions.RemoveAt(actionToDelete);
+                            EditorUtility.SetDirty(action);
                         }
-                        EditorGUILayout.EndHorizontal();
-                    }
-                    if (actionToDelete != -1)
-                    {
-                        Undo.RecordObject(action, "Removed input option action");
-                        opt.actions.RemoveAt(actionToDelete);
-                        EditorUtility.SetDirty(action);
-                    }
 
-                    if (GUILayout.Button("Add Action"))
-                    {
-                        Undo.RecordObject(action, "Added input option action");
-                        opt.actions.Add(new DialogAddInputAction.InputOptionAction());
-                        EditorUtility.SetDirty(action);
+                        if (GUILayout.Button("Add Action"))
+                        {
+                            Undo.RecordObject(action, "Added input option action");
+                            opt.actions.Add(new DialogAddInputAction.InputOptionAction());
+                            EditorUtility.SetDirty(action);
+                        }
                     }
                 }
                 EditorGUILayout.EndVertical();
@@ -736,6 +757,7 @@ public class DialogInspector : Editor
             {
                 Undo.RecordObject(action, "Removed input option");
                 action.options.RemoveAt(optionToDelete);
+                RemoveInputOptionFoldoutState(action, optionToDelete);
                 EditorUtility.SetDirty(action);
             }
 
@@ -749,6 +771,85 @@ public class DialogInspector : Editor
         EditorGUILayout.EndVertical();
 
         return didNotDelete;
+    }
+
+    bool GetDialogOptionFoldout(int index)
+    {
+        if (_dialogOptionFoldouts.TryGetValue(index, out var isExpanded))
+        {
+            return isExpanded;
+        }
+
+        _dialogOptionFoldouts[index] = true;
+        return true;
+    }
+
+    void RemoveDialogOptionFoldoutState(int removedIndex)
+    {
+        _dialogOptionFoldouts.Remove(removedIndex);
+
+        var keysToShift = _dialogOptionFoldouts.Keys
+            .Where(key => key > removedIndex)
+            .OrderBy(key => key)
+            .ToList();
+
+        foreach (var key in keysToShift)
+        {
+            var state = _dialogOptionFoldouts[key];
+            _dialogOptionFoldouts.Remove(key);
+            _dialogOptionFoldouts[key - 1] = state;
+        }
+    }
+
+    string GetInputOptionFoldoutKey(DialogAddInputAction action, int optionIndex)
+    {
+        return $"{action.GetInstanceID()}:{optionIndex}";
+    }
+
+    bool GetInputOptionFoldout(string key)
+    {
+        if (_inputOptionFoldouts.TryGetValue(key, out var isExpanded))
+        {
+            return isExpanded;
+        }
+
+        _inputOptionFoldouts[key] = true;
+        return true;
+    }
+
+    void RemoveInputOptionFoldoutState(DialogAddInputAction action, int removedIndex)
+    {
+        var actionId = action.GetInstanceID().ToString();
+        var prefix = $"{actionId}:";
+        var keys = _inputOptionFoldouts.Keys
+            .Where(key => key.StartsWith(prefix, StringComparison.Ordinal))
+            .ToList();
+
+        _inputOptionFoldouts.Remove($"{actionId}:{removedIndex}");
+
+        foreach (var key in keys)
+        {
+            if (!TryGetInputOptionIndex(key, prefix, out var index) || index <= removedIndex)
+            {
+                continue;
+            }
+
+            var state = _inputOptionFoldouts[key];
+            _inputOptionFoldouts.Remove(key);
+            _inputOptionFoldouts[$"{actionId}:{index - 1}"] = state;
+        }
+    }
+
+    bool TryGetInputOptionIndex(string key, string prefix, out int index)
+    {
+        index = -1;
+        if (key.Length <= prefix.Length)
+        {
+            return false;
+        }
+
+        var indexPart = key.Substring(prefix.Length);
+        return int.TryParse(indexPart, out index);
     }
 
     void DrawJsonExportImport(Dialog dialog)
