@@ -62,6 +62,55 @@ namespace Behaviours
 #endif
                 }
 
+                public static DialogOption DuplicateOption(int idxToDuplicate, Dialog dialog)
+                {
+#if UNITY_EDITOR
+                    UnityEditor.Undo.RecordObject(dialog, "Duplicate dialog option");
+#endif
+
+                    var sourceOption = dialog.options[idxToDuplicate];
+                    var duplicateOption = new DialogOption { dialog = dialog };
+
+                    foreach (var condition in sourceOption.conditions)
+                    {
+                        if (!condition)
+                        {
+                            duplicateOption.conditions.Add(null);
+                            continue;
+                        }
+
+                        var newCondition = Instantiate(condition);
+#if UNITY_EDITOR
+                        UnityEditor.AssetDatabase.AddObjectToAsset(newCondition, dialog);
+#endif
+                        duplicateOption.conditions.Add(newCondition);
+                    }
+
+                    foreach (var action in sourceOption.actions)
+                    {
+                        if (!action)
+                        {
+                            duplicateOption.actions.Add(null);
+                            continue;
+                        }
+
+                        var newAction = Instantiate(action);
+#if UNITY_EDITOR
+                        UnityEditor.AssetDatabase.AddObjectToAsset(newAction, dialog);
+#endif
+                        duplicateOption.actions.Add(newAction);
+                    }
+
+                    var insertIndex = Mathf.Clamp(idxToDuplicate + 1, 0, dialog.options.Count);
+                    dialog.options.Insert(insertIndex, duplicateOption);
+
+#if UNITY_EDITOR
+                    UnityEditor.EditorUtility.SetDirty(dialog);
+#endif
+
+                    return duplicateOption;
+                }
+
                 public static Condition CreateCondition(Dialog dialog, DialogOption option)
                 {
 #if UNITY_EDITOR

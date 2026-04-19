@@ -28,6 +28,7 @@ public class DialogInspector : Editor
         }
 
         var idxToDelete = -1;
+        var idxToDuplicate = -1;
         for (var i = 0; i < dialog.options.Count; i++)
         {
             var option = dialog.options[i];
@@ -40,6 +41,10 @@ public class DialogInspector : Editor
                 _dialogOptionFoldouts[i] = isExpanded;
                 GUILayout.FlexibleSpace();
                 EditorGUILayout.LabelField($"{option.conditions.Count} conditions / {option.actions.Count} actions", EditorStyles.miniLabel, GUILayout.MaxWidth(180));
+                if (GUILayout.Button("Duplicate", GUILayout.Width(80)))
+                {
+                    idxToDuplicate = i;
+                }
                 if (GUILayout.Button("Remove Option", GUILayout.Width(120)))
                 {
                     idxToDelete = i;
@@ -63,6 +68,12 @@ public class DialogInspector : Editor
         {
             Dialog.Editor.RemoveOption(idxToDelete, dialog);
             RemoveDialogOptionFoldoutState(idxToDelete);
+        }
+        else if (idxToDuplicate != -1)
+        {
+            var newIndex = idxToDuplicate + 1;
+            Dialog.Editor.DuplicateOption(idxToDuplicate, dialog);
+            InsertDialogOptionFoldoutState(newIndex, true);
         }
 
         EditorGUILayout.Space(10);
@@ -799,6 +810,23 @@ public class DialogInspector : Editor
             _dialogOptionFoldouts.Remove(key);
             _dialogOptionFoldouts[key - 1] = state;
         }
+    }
+
+    void InsertDialogOptionFoldoutState(int insertedIndex, bool initialState)
+    {
+        var keysToShift = _dialogOptionFoldouts.Keys
+            .Where(key => key >= insertedIndex)
+            .OrderByDescending(key => key)
+            .ToList();
+
+        foreach (var key in keysToShift)
+        {
+            var state = _dialogOptionFoldouts[key];
+            _dialogOptionFoldouts.Remove(key);
+            _dialogOptionFoldouts[key + 1] = state;
+        }
+
+        _dialogOptionFoldouts[insertedIndex] = initialState;
     }
 
     string GetInputOptionFoldoutKey(DialogAddInputAction action, int optionIndex)

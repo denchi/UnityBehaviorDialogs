@@ -299,7 +299,7 @@ namespace Behaviours.Dialogs
             value.type = (ValueType)(valueObj["type"]?.ToObject<int>() ?? 0);
 
 #if UNITY_EDITOR
-            UnityEditor.AssetDatabase.AddObjectToAsset(value, parentDialog);
+            TryAddSubAsset(value, parentDialog);
 #endif
 
             switch (value.type)
@@ -386,7 +386,7 @@ namespace Behaviours.Dialogs
                 condition.sConstant = conditionObj["sConstant"].ToString();
 
 #if UNITY_EDITOR
-            UnityEditor.AssetDatabase.AddObjectToAsset(condition, parentDialog);
+            TryAddSubAsset(condition, parentDialog);
 #endif
 
             return condition;
@@ -488,12 +488,22 @@ namespace Behaviours.Dialogs
             if (action != null)
             {
 #if UNITY_EDITOR
-                UnityEditor.AssetDatabase.AddObjectToAsset(action, parentDialog);
+                TryAddSubAsset(action, parentDialog);
 #endif
             }
 
             return action;
         }
+
+#if UNITY_EDITOR
+        private static void TryAddSubAsset(UnityEngine.Object child, Dialog parentDialog)
+        {
+            if (child == null || parentDialog == null) return;
+            if (!UnityEditor.EditorUtility.IsPersistent(parentDialog)) return;
+
+            UnityEditor.AssetDatabase.AddObjectToAsset(child, parentDialog);
+        }
+#endif
 
         #endregion
 
