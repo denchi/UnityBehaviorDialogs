@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
+using ValueType = Behaviours.ValueType;
 
 [CustomEditor(typeof(Dialog))]
 public class DialogInspector : Editor
