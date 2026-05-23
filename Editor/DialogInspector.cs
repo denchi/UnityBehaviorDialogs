@@ -33,8 +33,9 @@ public class DialogInspector : Editor
         {
             var option = dialog.options[i];
             EditorGUILayout.Space(8);
-            EditorGUILayout.BeginVertical("box");
+            EditorGUILayout.BeginVertical();
             {
+                // Option Header
                 EditorGUILayout.BeginHorizontal();
                 var isExpanded = GetDialogOptionFoldout(i);
                 isExpanded = EditorGUILayout.Foldout(isExpanded, $"Option {i + 1}", true);
@@ -51,14 +52,11 @@ public class DialogInspector : Editor
                 }
                 EditorGUILayout.EndHorizontal();
 
+                // Option Body
                 if (isExpanded)
                 {
                     EditorGUILayout.Space(4);
-
-                    if (DrawOption(i, dialog, values))
-                    {
-                        // Option drawn successfully
-                    }
+                    DrawOption(i, dialog, values);
                 }
             }
             EditorGUILayout.EndVertical();
@@ -76,8 +74,9 @@ public class DialogInspector : Editor
             InsertDialogOptionFoldoutState(newIndex, true);
         }
 
-        EditorGUILayout.Space(10);
         DrawAddOption(dialog);
+        
+        EditorGUILayout.Space(5);
         
         EditorGUILayout.Space(15);
         DrawJsonExportImport(dialog);
@@ -155,37 +154,33 @@ public class DialogInspector : Editor
         var option = dialog.options[idx];
 
         // Outline for Conditions block
-        EditorGUILayout.BeginVertical("HelpBox");
+        EditorGUILayout.BeginVertical();
         {
-            EditorGUILayout.BeginVertical(GUI.skin.box);
+            EditorGUILayout.LabelField("Conditions", EditorStyles.boldLabel);
+            var idxToDelete = -1;
+            for (var i = 0; i < option.conditions.Count; i++)
             {
-                EditorGUILayout.LabelField("Conditions", EditorStyles.boldLabel);
-                var idxToDelete = -1;
-                for (var i = 0; i < option.conditions.Count; i++)
+                var condition = option.conditions[i];
+                if (!DrawCondition(i, condition, dialog, values))
                 {
-                    var condition = option.conditions[i];
-                    if (!DrawCondition(i, condition, dialog, values))
-                    {
-                        idxToDelete = i;
-                    }
+                    idxToDelete = i;
                 }
-                if (idxToDelete != -1)
-                {
-                    Dialog.Editor.RemoveCondition(dialog, option, idxToDelete);
-                }
-
-                DrawAddOptionCondition(dialog, option);
             }
-            EditorGUILayout.EndVertical();
+            if (idxToDelete != -1)
+            {
+                Dialog.Editor.RemoveCondition(dialog, option, idxToDelete);
+            }
+
+            DrawAddOptionCondition(dialog, option);
         }
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.Space(4);
 
         // Outline for Actions block
-        EditorGUILayout.BeginVertical("HelpBox");
+        EditorGUILayout.BeginVertical();
         {
-            EditorGUILayout.BeginVertical(GUI.skin.box);
+            EditorGUILayout.BeginVertical();
             {
                 EditorGUILayout.LabelField("Actions", EditorStyles.boldLabel);
 
@@ -624,7 +619,7 @@ public class DialogInspector : Editor
     {
         bool didNotDelete = true;
 
-        EditorGUILayout.BeginVertical(GUI.skin.box);
+        EditorGUILayout.BeginVertical();
         {
             EditorGUILayout.BeginHorizontal();
             {
@@ -646,7 +641,14 @@ public class DialogInspector : Editor
             }
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.LabelField("Options", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Action Options", EditorStyles.boldLabel);
+            
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.Space(10);
+            EditorGUILayout.EndVertical();
+            
+            EditorGUILayout.BeginVertical();
 
             if (action.options == null)
                 action.options = new List<DialogAddInputAction.InputOption>();
@@ -657,11 +659,11 @@ public class DialogInspector : Editor
                 var opt = action.options[i];
                 var foldoutKey = GetInputOptionFoldoutKey(action, i);
                 var isExpanded = GetInputOptionFoldout(foldoutKey);
-                EditorGUILayout.BeginVertical(GUI.skin.box);
+                EditorGUILayout.BeginVertical();
                 {
                     EditorGUILayout.BeginHorizontal();
                     {
-                        isExpanded = EditorGUILayout.Foldout(isExpanded, $"Option {i + 1}", true);
+                        isExpanded = EditorGUILayout.Foldout(isExpanded, $"Action Option {i + 1}", true);
                         _inputOptionFoldouts[foldoutKey] = isExpanded;
                         GUILayout.FlexibleSpace();
                         if (GUILayout.Button("-", GUILayout.Width(20)))
@@ -778,6 +780,10 @@ public class DialogInspector : Editor
                 action.options.Add(new DialogAddInputAction.InputOption());
                 EditorUtility.SetDirty(action);
             }
+            
+            EditorGUILayout.EndVertical();
+            
+            EditorGUILayout.EndHorizontal();
         }
         EditorGUILayout.EndVertical();
 

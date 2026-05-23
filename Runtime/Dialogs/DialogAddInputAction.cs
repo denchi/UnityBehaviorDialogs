@@ -13,8 +13,12 @@ namespace Behaviours.Dialogs
         public string prompt;
         public List<InputOption> options = new List<InputOption>();
 
+        //
+        
         private bool _isCancelled;
 
+        //
+        
         private void OnEnable()
         {
             foreach (var option in options)
@@ -23,67 +27,8 @@ namespace Behaviours.Dialogs
             }
         }
 
-        [Serializable]
-        public class InputOption
-        {
-            public string text;
-            public List<InputOptionAction> actions = new List<InputOptionAction>();
-            
-            private DialogAddInputAction _dialogAction;
-
-            public DialogAddInputAction DialogAction
-            {
-                get => _dialogAction;
-                set
-                {
-                    _dialogAction = value;
-                    foreach (var action in actions)
-                    {
-                        action.Option = this;
-                    }
-                }
-            }
-        }
+        //
         
-        [Serializable]
-        public class InputOptionAction
-        {
-            public InputOptionActionType type;
-            public string varName;
-            public string stateName;
-            public TimelineAsset cutscene;
-
-            private InputOption _option;
-
-            public InputOption Option
-            {
-                get => _option;
-                set => _option = value;
-            }
-            
-            public IEnumerable GetValuesForDropdown()
-            {
-                #if UNITY_EDITOR
-                var thisPath = UnityEditor.AssetDatabase.GetAssetPath(Option.DialogAction);
-                var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(thisPath);
-                if (mainAsset is ILayer layer)
-                {
-                    return layer.values.Select(v => v.name);
-                }
-                #endif
-
-                return Array.Empty<string>();
-            }
-        }
-        
-        public enum InputOptionActionType
-        {
-            None = -1,
-            TriggerAction,
-            ChangeValue,
-            Cutscene
-        }
-
         public override IEnumerator Execute(IDialogContext context)
         {
             Debug.Log("[PanelSubtitles] context.ShowInputs");
@@ -137,6 +82,69 @@ namespace Behaviours.Dialogs
 
             context.HideSubtitles();
             context.StopVoice();
+        }
+        
+        //
+        
+        [Serializable]
+        public class InputOption
+        {
+            public string text;
+            public List<InputOptionAction> actions = new List<InputOptionAction>();
+            
+            private DialogAddInputAction _dialogAction;
+
+            public DialogAddInputAction DialogAction
+            {
+                get => _dialogAction;
+                set
+                {
+                    _dialogAction = value;
+                    foreach (var action in actions)
+                    {
+                        action.Option = this;
+                    }
+                }
+            }
+        }
+        
+        [Serializable]
+        public class InputOptionAction
+        {
+            public InputOptionActionType type;
+            public string varName;
+            public string stateName;
+            public TimelineAsset cutscene;
+
+            private InputOption _option;
+
+            public InputOption Option
+            {
+                get => _option;
+                set => _option = value;
+            }
+            
+            public IEnumerable GetValuesForDropdown()
+            {
+#if UNITY_EDITOR
+                var thisPath = UnityEditor.AssetDatabase.GetAssetPath(Option.DialogAction);
+                var mainAsset = UnityEditor.AssetDatabase.LoadMainAssetAtPath(thisPath);
+                if (mainAsset is ILayer layer)
+                {
+                    return layer.values.Select(v => v.name);
+                }
+#endif
+
+                return Array.Empty<string>();
+            }
+        }
+        
+        public enum InputOptionActionType
+        {
+            None = -1,
+            TriggerAction,
+            ChangeValue,
+            Cutscene
         }
     }
 }
