@@ -730,6 +730,18 @@ public class DialogInspector : Editor
                                             EditorUtility.SetDirty(action);
                                         }
                                         break;
+                                    case DialogAddInputAction.InputOptionActionType.ChangeState:
+                                        EditorGUI.BeginChangeCheck();
+                                        string newStateVar = EditorGUILayout.TextField(GUIContent.none, optAction.stateName);
+                                        bool newStateValue = EditorGUILayout.Toggle(optAction.stateValue, GUILayout.Width(18));
+                                        if (EditorGUI.EndChangeCheck())
+                                        {
+                                            Undo.RecordObject(action, "Changed input option action state");
+                                            optAction.stateName = newStateVar;
+                                            optAction.stateValue = newStateValue;
+                                            EditorUtility.SetDirty(action);
+                                        }
+                                        break;
                                     case DialogAddInputAction.InputOptionActionType.Cutscene:
                                         EditorGUI.BeginChangeCheck();
                                         var newCutscene = (UnityEngine.Timeline.TimelineAsset)EditorGUILayout.ObjectField(optAction.cutscene, typeof(UnityEngine.Timeline.TimelineAsset), false);

@@ -67,6 +67,9 @@ namespace Behaviours.Dialogs
                         case InputOptionActionType.TriggerAction:
                             context.TriggerAction(action.stateName);
                             break;
+                        case InputOptionActionType.ChangeState:
+                            context.ChangeState(action.stateName, action.stateValue);
+                            break;
                         
                         case InputOptionActionType.Cutscene:
                             context.PlayCutscene(action.cutscene);
@@ -114,6 +117,7 @@ namespace Behaviours.Dialogs
             public InputOptionActionType type;
             public string varName;
             public string stateName;
+            public bool stateValue = true;
             public TimelineAsset cutscene;
 
             private InputOption _option;
@@ -144,7 +148,8 @@ namespace Behaviours.Dialogs
             None = -1,
             TriggerAction,
             ChangeValue,
-            Cutscene
+            Cutscene,
+            ChangeState
         }
     }
 }

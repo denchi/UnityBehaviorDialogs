@@ -210,6 +210,7 @@ namespace Behaviours.Dialogs
                             inputActionObj["type"] = (int)inputOptionAction.type;
                             inputActionObj["varName"] = inputOptionAction.varName;
                             inputActionObj["stateName"] = inputOptionAction.stateName;
+                            inputActionObj["stateValue"] = inputOptionAction.stateValue;
                             if (inputOptionAction.cutscene != null)
                             {
                                 var cutscenePath = AssetPathResolver.GetAssetPath(inputOptionAction.cutscene);
@@ -467,6 +468,8 @@ namespace Behaviours.Dialogs
                                     inputOptionAction.type = (DialogAddInputAction.InputOptionActionType)(inputActionData?["type"]?.ToObject<int>() ?? 0);
                                     inputOptionAction.varName = inputActionData?["varName"]?.ToString() ?? "";
                                     inputOptionAction.stateName = inputActionData?["stateName"]?.ToString() ?? "";
+                                    if (inputActionData?["stateValue"] != null)
+                                        inputOptionAction.stateValue = inputActionData["stateValue"].ToObject<bool>();
                                     var cutscenePath = inputActionData?["cutscenePath"]?.ToString();
                                     if (!string.IsNullOrEmpty(cutscenePath))
                                         inputOptionAction.cutscene = AssetPathResolver.LoadAssetAtPath<UnityEngine.Timeline.TimelineAsset>(cutscenePath);

@@ -15,6 +15,7 @@ namespace Behaviours.Dialogs
         void HideSubtitles();
         void ShowInputs(string prompt, List<string> optionsNames, Action<string> onSelect, Action onCancel);
         void TriggerAction(string actionStateName);
+        void ChangeState(string actionStateName, bool value);
         void PlayCutscene(TimelineAsset actionCutscene);
     }
 }
