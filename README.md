@@ -1,6 +1,6 @@
 # Behaviour Dialog
 
-Unity package (`com.deathbygravitystudio.behaviour.dialog` 0.1.0) of ScriptableObject dialogs: each option runs talk, variable, choice, and Timeline actions when its shared-variable conditions pass.
+Behaviour Dialog (`com.deathbygravitystudio.behaviour.dialog` 0.1.0) stores dialogue options as ScriptableObjects. Conditions control which options run; actions handle text, variables, choices, and Timeline cutscenes.
 
 Author: Death By Gravity Studio.
 
